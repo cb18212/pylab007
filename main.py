@@ -22,7 +22,10 @@ def vigenere_sq():
 		print()
 
 def letter_to_index(letter, alphabet):
-	return alphabet.index(letter)
+	if letter in alphabet:
+		return alphabet.index(letter)
+	else:
+		return None
 
 def index_to_letter(index, alphabet):
 	return alphabet[index]
@@ -30,10 +33,10 @@ def index_to_letter(index, alphabet):
 def vigenere_index(key_letter, plaintext_letter, alphabet):
 	return (letter_to_index(key_letter, alphabet) + letter_to_index(plaintext_letter, alphabet)) % 26
 
-def vigenere_letter(key_letter, plaintext_letter, alphabet):
-	row = letter_to_index(plaintext_letter, alphabet)
-	col = letter_to_index(key_letter, alphabet)
-	return int(square[row][col])
+# def vigenere_letter(key_letter, plaintext_letter, alphabet):
+# 	row = letter_to_index(plaintext_letter, alphabet)
+# 	col = letter_to_index(key_letter, alphabet)
+# 	return int(square[row][col])
 
 def encrypt_vigenere(key, plaintext, alphabet):
 	i = 0
@@ -42,13 +45,13 @@ def encrypt_vigenere(key, plaintext, alphabet):
 		i += 1
 	#print(key)
 	#print(plaintext)
-	result = ""
+	result = []
 	for i in range(len(plaintext)):
-		if plaintext[i] == " ":
-			result += " "
+		if not plaintext[i] in alphabet:
+			result += plaintext[i]
 		else:
 			result += alphabet[vigenere_index(key[i], plaintext[i], alphabet)]
-	return result
+	return"".join(result)
 
 def decrypt_vigenere(key, ciphertext, alphabet):
 	i = 0
@@ -56,19 +59,21 @@ def decrypt_vigenere(key, ciphertext, alphabet):
 		key += key[i]
 		i += 1
 
-	result = ""
+	result = []
 	for index in range(len(ciphertext)):
-		if ciphertext[index] == " ":
-			result += " "
+		if not ciphertext[index] in alphabet:
+			result += ciphertext[index]
 		else:
 			result += index_to_letter(letter_to_index(ciphertext[index], alphabet) - letter_to_index(key[index], alphabet), alphabet)
-	return result
+	return "".join(result)
 
 key = "messwiththebestdieliketherest"
 
 
 
 #vigenere_sq()
+
+commands = ["encrypt", "decrypt", "quit"]
 
 while True:
 	action = input("Would you like to encrypt, decrypt, or quit?? (1/encrypt) (2/decrypt) (3/quit): ").strip()
@@ -85,7 +90,16 @@ while True:
 		print("Invalid selection! Please try again")
 
 	if action != 4:
-		key = input("What is the key for the message?: ")
+		valid_key = False
+		while not valid_key:
+			valid_key = True
+			key = input("What is the key for the message?: ")
+			for i in key:
+				if not i in alphabet:
+					valid_key = False
+					print("Keys can only contain letters")
+					break
+
 		if action == 1:
 			res = encrypt_vigenere(key, input("What plaintext would you like to encrypt?: "), alphabet)
 		elif action == 2:
