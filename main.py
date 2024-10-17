@@ -1,5 +1,9 @@
 import math
+from argparse import Action
 from pydoc import plain
+from enum import Enum
+
+from pyexpat.errors import messages
 
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 square = []
@@ -73,37 +77,56 @@ key = "messwiththebestdieliketherest"
 
 #vigenere_sq()
 
-commands = ["encrypt", "decrypt", "quit"]
+class Actions(Enum):
+	ENCRYPT = 1
+	DECRYPT = 2
+	DECRYPTALL = 3
+	QUIT = 4
+	ERROR = 5
+
+def check_com(inp):
+	if inp.isdigit():
+		return int(inp)
+	for act in Actions:
+		if inp.lower() == act.name.lower():
+			return act.value
+	return Actions.ERROR
+
+def get_key():
+	valid_key = False
+	while not valid_key:
+		valid_key = True
+		key = input("What is the key for the message?: ")
+		for i in key:
+			if not i in alphabet:
+				valid_key = False
+				print("Keys can only contain letters")
+				break
+	return key
+
+store = []
 
 while True:
-	action = input("Would you like to encrypt, decrypt, or quit?? (1/encrypt) (2/decrypt) (3/quit): ").strip()
-	if action == "encrypt":
-		action = 1
-	elif action == "decrypt":
-		action = 2
-	elif action in ["quit", "3"]:
-		break
-	elif action in ["1","2"]:
-		action = int(action)
+	action = input("Would you like to encrypt, decrypt, decrypt all or quit?? (1/encrypt) (2/decrypt) (3/decryptall) (4/quit): ").strip()
+	action = check_com(action)
+	if action != Actions.ERROR:
+		print(f"action: {action}")
+		match action:
+			case Actions.ENCRYPT.value:
+				key = get_key()
+				res = encrypt_vigenere(key, input("What plaintext would you like to encrypt?: "), alphabet)
+				store.append([res, key])
+				print(f"\nStored Result: {res}\n")
+			case Actions.DECRYPT.value:
+				key = get_key()
+				res = decrypt_vigenere(key, input("What ciphertext would you like to decrypt?: "), alphabet)
+				print(f"\nResult: {res}\n")
+			case Actions.DECRYPTALL.value:
+				print("decrypting stored messages...")
+				for pair in store:
+					print(f"\nKey: {pair[1]}\nmessage: {decrypt_vigenere(pair[1], pair[0], alphabet)}")
+				print()
+			case default:
+				print("I have no clue what you did, but something's screwed up.")
 	else:
-		action = 4 #Incorrect input
-		print("Invalid selection! Please try again")
-
-	if action != 4:
-		valid_key = False
-		while not valid_key:
-			valid_key = True
-			key = input("What is the key for the message?: ")
-			for i in key:
-				if not i in alphabet:
-					valid_key = False
-					print("Keys can only contain letters")
-					break
-
-		if action == 1:
-			res = encrypt_vigenere(key, input("What plaintext would you like to encrypt?: "), alphabet)
-		elif action == 2:
-			res = decrypt_vigenere(key, input("What ciphertext would you like to decrypt?: "), alphabet)
-		else:
-			print("I have no clue what you did, but something's screwed up.")
-		print(f"\nResult: {res}\n")
+		print("Invlid Input received, please select another option")
