@@ -80,9 +80,11 @@ key = "messwiththebestdieliketherest"
 class Actions(Enum):
 	ENCRYPT = 1
 	DECRYPT = 2
-	DECRYPTALL = 3
-	QUIT = 4
-	ERROR = 5
+	DECRYPTSTASH = 3
+	DUMPSTASH = 4
+	CLEAR = 5
+	QUIT = 6
+	ERROR = 7
 
 def check_com(inp):
 	if inp.isdigit():
@@ -107,7 +109,7 @@ def get_key():
 store = []
 
 while True:
-	action = input("Would you like to encrypt, decrypt, decrypt all or quit?? (1/encrypt) (2/decrypt) (3/decryptall) (4/quit): ").strip()
+	action = input("Would you like to encrypt, decrypt, decrypt stash, print stored ciphertexts, clear the stash or quit?? (1/encrypt) (2/decrypt) (3/decryptstash) (4/dumpstash) (5/clear) (6/quit): ").strip()
 	action = check_com(action)
 	if action != Actions.ERROR:
 		print(f"action: {action}")
@@ -121,11 +123,19 @@ while True:
 				key = get_key()
 				res = decrypt_vigenere(key, input("What ciphertext would you like to decrypt?: "), alphabet)
 				print(f"\nResult: {res}\n")
-			case Actions.DECRYPTALL.value:
-				print("decrypting stored messages...")
+			case Actions.DECRYPTSTASH.value:
+				print("Decrypting stored messages...")
 				for pair in store:
 					print(f"\nKey: {pair[1]}\nmessage: {decrypt_vigenere(pair[1], pair[0], alphabet)}")
 				print()
+			case Actions.DUMPSTASH.value:
+				print("\nDisplaying stash...")
+				for pair in store:
+					print(f"Encrypted message: {pair[0]}")
+				print()
+			case Actions.CLEAR.value:
+				print("Clearing ciphertext stash...\n")
+				store = []
 			case default:
 				print("I have no clue what you did, but something's screwed up.")
 	else:
